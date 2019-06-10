@@ -38,18 +38,17 @@ class PxToVw extends React.Component {
     super(props)
     this.state = {
       viewport: '', 
-      px: '', 
-      multiple: ''
+      px: ''
     }
     this.handleViewportChange = this.handleViewportChange.bind(this)
     this.handlePxChange = this.handlePxChange.bind(this)
     this.handleCalculate = this.handleCalculate.bind(this)
-    this.hanldeMultipleChange = this.hanldeMultipleChange.bind(this)
   }
 
   handleCalculate () {
-    this.props.calculate(this.state.viewport, this.state.px, this.state.multiple)
+    this.props.calculate(this.state.viewport, this.state.px)
   }
+
   handleViewportChange (e) {
     this.setState({viewport: e.target.value})
   }
@@ -57,22 +56,10 @@ class PxToVw extends React.Component {
   handlePxChange (e) {
     this.setState({px: e.target.value})
   }
-  hanldeMultipleChange (value) {
-    this.setState({multiple: value})
-  }
   
   render () {
     return (
       <div className="input-block">
-        <Select
-          defaultValue="Please select the multiple of your design draft"
-          style={{width: 300}}
-          onChange={this.hanldeMultipleChange}
-        >
-          <Option key="0" value="1">1x</Option>
-          <Option key="1" value="2">2x</Option>
-          <Option key="2" value="4">4x</Option>
-        </Select>
         <Input style={{width: 200}} type="number" onChange={this.handleViewportChange} placeholder="please input your viewport" />
         <Input style={{width: 200}} type="number" onChange={this.handlePxChange} placeholder="please input your px" />
         <Button onClick={this.handleCalculate}>Calculate</Button>
@@ -86,40 +73,28 @@ class VwToPx extends React.Component {
     super(props)
     this.state = {
       viewport: '', 
-      vw: '',
-      multiple: ''
+      vw: ''
     }
     this.handleViewportChange = this.handleViewportChange.bind(this)
     this.handleVwChange = this.handleVwChange.bind(this)
     this.handleCalculate = this.handleCalculate.bind(this)
-    this.hanldeMultipleChange = this.hanldeMultipleChange.bind(this)
   }
   
   handleCalculate () {
-    this.props.calculate(this.state.viewport, this.state.vw, this.state.multiple)
+    this.props.calculate(this.state.viewport, this.state.vw)
   }
+
   handleViewportChange (e) {
     this.setState({viewport: e.target.value})
   }
+  
   handleVwChange (e) {
     this.setState({vw: e.target.value})
-  }
-  hanldeMultipleChange (value) {
-    this.setState({multiple: value})
   }
 
   render () {
     return (
       <div className="input-block">
-        <Select
-          defaultValue="Please select the multiple of your design draft"
-          style={{width: 300}}
-          onChange={this.hanldeMultipleChange}
-        >
-          <Option key="0" value="1">1x</Option>
-          <Option key="1" value="2">2x</Option>
-          <Option key="2" value="4">4x</Option>
-        </Select>
         <Input style={{width: 200}} type="number" onChange={this.handleViewportChange} placeholder="please input your viewport" />
         <Input style={{width: 200}} type="number" onChange={this.handleVwChange} placeholder="please input your vw" />
         <Button onClick={this.handleCalculate}>Calculate</Button>
@@ -147,13 +122,13 @@ class App extends React.Component {
     })
   }
 
-  handleVwResult (viewport, px, multiple) {
-    const result = `${px / ((viewport / multiple) / 100)}vw`
+  handleVwResult (viewport, px) {
+    const result = `${px / (viewport / 100)}vw`
     this.setState({result: result})
   }
 
-  handlePxResult (viewport, vw, multiple) {
-    const result = `${vw * ((viewport / multiple) / 100)}px`
+  handlePxResult (viewport, vw) {
+    const result = `${vw * (viewport / 100)}px`
     this.setState({result: result})
   }
 
