@@ -17,6 +17,43 @@ main {
   font-size: 20px;
   font-weight: bold;
 }
+.sub-title {
+  font-size: 18px;
+}
+.file-transform {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  padding: 0 100px;
+}
+.file {
+  position: relative;
+  display: inline-block;
+  background: #fff;
+  border: 1px solid rgb(217, 217, 217);
+  border-radius: 4px;
+  padding: 4px 12px;
+  overflow: hidden;
+  color: rgba(191, 191, 191, 1);
+  text-decoration: none;
+  text-indent: 0;
+  line-height: 20px;
+}
+.file input {
+  position: absolute;
+  font-size: 100px;
+  right: 0;
+  top: 0;
+  opacity: 0;
+}
+.file input:hover {
+  cursor: pointer;
+}
+.file:hover {
+  cursor: pointer;
+  color: rgba(191, 191, 191, 1);
+  text-decoration: none;
+}
 
 @keyframes fade {
   from {

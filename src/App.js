@@ -7,6 +7,7 @@ import 'antd/lib/button/style/css'
 import 'antd/lib/input/style/css'
 import './App.css'
 const { Option } = Select
+const { TextArea } = Input
 
 class Myselect extends React.Component {
   constructor (props) {
@@ -38,11 +39,13 @@ class PxToVw extends React.Component {
     super(props)
     this.state = {
       viewport: '', 
-      px: ''
+      px: '',
+      transformText: ''
     }
     this.handleViewportChange = this.handleViewportChange.bind(this)
     this.handlePxChange = this.handlePxChange.bind(this)
     this.handleCalculate = this.handleCalculate.bind(this)
+    this.handleUpload = this.handleUpload.bind(this)
   }
 
   handleCalculate () {
@@ -56,6 +59,17 @@ class PxToVw extends React.Component {
   handlePxChange (e) {
     this.setState({px: e.target.value})
   }
+
+  handleUpload () {
+    const file = document.getElementById('file')
+    const reader = new FileReader()
+    reader.readAsText(file.files[0], 'UTF-8')
+    reader.onload = event => {
+      const content = event.target.result
+      this.setState({transformText: content})
+    }
+    
+  }
   
   render () {
     return (
@@ -63,6 +77,19 @@ class PxToVw extends React.Component {
         <Input style={{width: 200}} type="number" onChange={this.handleViewportChange} placeholder="please input your viewport" />
         <Input style={{width: 200}} type="number" onChange={this.handlePxChange} placeholder="please input your px" />
         <Button onClick={this.handleCalculate}>Calculate</Button>
+        <p className="sub-title">Or you can upload the css file to transform the whole file</p>
+        <div className="file-transform">
+          <a href="javascript:;" className="file">select the css file
+            <input type="file" id="file"></input>
+          </a>
+          <Button onClick={this.handleUpload}>transform</Button>
+          <TextArea
+            placeholder="The transform file text"
+            style={{width: 300}}
+            value={this.state.transformText}
+            autosize={{ minRows: 2, maxRows: 6 }}
+          />
+        </div>
       </div>
     )
   }
