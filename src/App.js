@@ -45,7 +45,6 @@ class PxToVw extends React.Component {
     this.handleViewportChange = this.handleViewportChange.bind(this)
     this.handlePxChange = this.handlePxChange.bind(this)
     this.handleCalculate = this.handleCalculate.bind(this)
-    this.handleUpload = this.handleUpload.bind(this)
   }
 
   handleCalculate () {
@@ -59,17 +58,6 @@ class PxToVw extends React.Component {
   handlePxChange (e) {
     this.setState({px: e.target.value})
   }
-
-  handleUpload () {
-    const file = document.getElementById('file')
-    const reader = new FileReader()
-    reader.readAsText(file.files[0], 'UTF-8')
-    reader.onload = event => {
-      const content = event.target.result
-      this.setState({transformText: content})
-    }
-    
-  }
   
   render () {
     return (
@@ -77,12 +65,83 @@ class PxToVw extends React.Component {
         <Input style={{width: 200}} type="number" onChange={this.handleViewportChange} placeholder="please input your viewport" />
         <Input style={{width: 200}} type="number" onChange={this.handlePxChange} placeholder="please input your px" />
         <Button onClick={this.handleCalculate}>Calculate</Button>
+        <FileTransform type="pxToVw"></FileTransform>
+      </div>
+    )
+  }
+}
+
+class FileTransform extends React.Component {
+  constructor (props) {
+    super(props)
+    this.state = {
+      fileName: '',
+      originalText: '',
+      transformText: ''
+    }
+    this.handleFileContent = this.handleFileContent.bind(this)
+    this.vwTransform = this.vwTransform.bind(this)
+    this.pxTransform = this.pxTransform.bind(this)
+  }
+
+  handleFileContent () {
+    const file = document.getElementById('file')
+    const reader = new FileReader()
+    file.files[0]
+      ? reader.readAsText(file.files[0], 'UTF-8')
+      : alert('please upload the css file!')
+    reader.onload = event => {
+      const content = event.target.result
+      this.setState({fileName: file.files[0].name, originalText: content})
+    }
+  }
+
+  vwTransform () {
+    const content = this.state.originalText
+    const matchedStr = content.match(/\d*(.?)\d*vw/g)
+    const arr = matchedStr.map(item => {
+      return `${((item.substring(0, item.length - 2)) * 3.2).toFixed(2)}px`
+    })
+    const reg = new RegExp(/\d*(.?)\d*vw/)
+    let replaceText = ''
+    arr.forEach(item => {
+      if (replaceText === '') {
+        replaceText = content.replace(reg, item)
+      } else {
+        replaceText = replaceText.replace(reg, item)
+      }
+    })
+    this.setState({transformText: replaceText})
+  }
+
+  pxTransform () {
+    const content = this.state.originalText
+    const matchedStr = content.match(/\d*(.?)\d*px/g)
+    const arr = matchedStr.map(item => {
+      return `${((item.substring(0, item.length - 2)) / 3.2).toFixed(2)}vw`
+    })
+    const reg = new RegExp(/\d*(.?)\d*px/)
+    let replaceText = ''
+    arr.forEach(item => {
+      if (replaceText === '') {
+        replaceText = content.replace(reg, item)
+      } else {
+        replaceText = replaceText.replace(reg, item)
+      }
+    })
+    this.setState({transformText: replaceText})
+  }
+
+  render () {
+    return (
+      <div className="file-container">
         <p className="sub-title">Or you can upload the css file to transform the whole file</p>
         <div className="file-transform">
           <a href="javascript:;" className="file">select the css file
-            <input type="file" id="file"></input>
+            <input type="file" id="file" onChange={this.handleFileContent}></input>
           </a>
-          <Button onClick={this.handleUpload}>transform</Button>
+          <span>{this.state.fileName}</span>
+          <Button onClick={this.props.type === 'pxToVw' ? this.pxTransform : this.vwTransform}>transform</Button>
           <TextArea
             placeholder="The transform file text"
             style={{width: 300}}
@@ -125,6 +184,7 @@ class VwToPx extends React.Component {
         <Input style={{width: 200}} type="number" onChange={this.handleViewportChange} placeholder="please input your viewport" />
         <Input style={{width: 200}} type="number" onChange={this.handleVwChange} placeholder="please input your vw" />
         <Button onClick={this.handleCalculate}>Calculate</Button>
+        <FileTransform type="vwTransform"></FileTransform>
       </div>
     )
   }
