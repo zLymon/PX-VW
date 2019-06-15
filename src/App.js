@@ -2,9 +2,11 @@ import React from 'react';
 import Select from 'antd/lib/select'
 import Button from 'antd/lib/button'
 import Input from 'antd/lib/input'
+import message from 'antd/lib/message'
 import 'antd/lib/select/style/css'
 import 'antd/lib/button/style/css'
 import 'antd/lib/input/style/css'
+import 'antd/lib/message/style/css'
 import './App.css'
 const { Option } = Select
 const { TextArea } = Input
@@ -65,90 +67,7 @@ class PxToVw extends React.Component {
         <Input style={{width: 200}} type="number" onChange={this.handleViewportChange} placeholder="please input your viewport" />
         <Input style={{width: 200}} type="number" onChange={this.handlePxChange} placeholder="please input your px" />
         <Button onClick={this.handleCalculate}>Calculate</Button>
-        <FileTransform type="pxToVw"></FileTransform>
-      </div>
-    )
-  }
-}
-
-class FileTransform extends React.Component {
-  constructor (props) {
-    super(props)
-    this.state = {
-      fileName: '',
-      originalText: '',
-      transformText: ''
-    }
-    this.handleFileContent = this.handleFileContent.bind(this)
-    this.vwTransform = this.vwTransform.bind(this)
-    this.pxTransform = this.pxTransform.bind(this)
-  }
-
-  handleFileContent () {
-    const file = document.getElementById('file')
-    const reader = new FileReader()
-    file.files[0]
-      ? reader.readAsText(file.files[0], 'UTF-8')
-      : alert('please upload the css file!')
-    reader.onload = event => {
-      const content = event.target.result
-      this.setState({fileName: file.files[0].name, originalText: content})
-    }
-  }
-
-  vwTransform () {
-    const content = this.state.originalText
-    const matchedStr = content.match(/\d*(.?)\d*vw/g)
-    const arr = matchedStr.map(item => {
-      return `${((item.substring(0, item.length - 2)) * 3.2).toFixed(2)}px`
-    })
-    const reg = new RegExp(/\d*(.?)\d*vw/)
-    let replaceText = ''
-    arr.forEach(item => {
-      if (replaceText === '') {
-        replaceText = content.replace(reg, item)
-      } else {
-        replaceText = replaceText.replace(reg, item)
-      }
-    })
-    this.setState({transformText: replaceText})
-  }
-
-  pxTransform () {
-    const content = this.state.originalText
-    const matchedStr = content.match(/\d*(.?)\d*px/g)
-    const arr = matchedStr.map(item => {
-      return `${((item.substring(0, item.length - 2)) / 3.2).toFixed(2)}vw`
-    })
-    const reg = new RegExp(/\d*(.?)\d*px/)
-    let replaceText = ''
-    arr.forEach(item => {
-      if (replaceText === '') {
-        replaceText = content.replace(reg, item)
-      } else {
-        replaceText = replaceText.replace(reg, item)
-      }
-    })
-    this.setState({transformText: replaceText})
-  }
-
-  render () {
-    return (
-      <div className="file-container">
-        <p className="sub-title">Or you can upload the css file to transform the whole file</p>
-        <div className="file-transform">
-          <a href="javascript:;" className="file">select the css file
-            <input type="file" id="file" onChange={this.handleFileContent}></input>
-          </a>
-          <span>{this.state.fileName}</span>
-          <Button onClick={this.props.type === 'pxToVw' ? this.pxTransform : this.vwTransform}>transform</Button>
-          <TextArea
-            placeholder="The transform file text"
-            style={{width: 300}}
-            value={this.state.transformText}
-            autosize={{ minRows: 2, maxRows: 6 }}
-          />
-        </div>
+        <FileTransform type="pxToVw" viewport={this.state.viewport}></FileTransform>
       </div>
     )
   }
@@ -184,7 +103,84 @@ class VwToPx extends React.Component {
         <Input style={{width: 200}} type="number" onChange={this.handleViewportChange} placeholder="please input your viewport" />
         <Input style={{width: 200}} type="number" onChange={this.handleVwChange} placeholder="please input your vw" />
         <Button onClick={this.handleCalculate}>Calculate</Button>
-        <FileTransform type="vwTransform"></FileTransform>
+        <FileTransform type="vwToPx" viewport={this.state.viewport}></FileTransform>
+      </div>
+    )
+  }
+}
+
+class FileTransform extends React.Component {
+  constructor (props) {
+    super(props)
+    this.state = {
+      fileName: '',
+      originalText: '',
+      transformText: ''
+    }
+    this.handleFileContent = this.handleFileContent.bind(this)
+    this.transform = this.transform.bind(this)
+  }
+
+  handleFileContent () {
+    const file = document.getElementById('file')
+    const reader = new FileReader()
+    file.files[0]
+      ? reader.readAsText(file.files[0], 'UTF-8')
+      : alert('please upload the css file!')
+    reader.onload = event => {
+      const content = event.target.result
+      this.setState({fileName: file.files[0].name, originalText: content})
+    }
+  }
+
+  transform () {
+    if (this.props.viewport === '' || this.state.originalText === '') {
+      message.error('Please make sure the values in the input box are entered.')
+      return
+    }
+    const content = this.state.originalText
+    let matchedStr, arr, reg
+    if (this.props.type === 'vwToPx') {
+      matchedStr = content.match(/\d*(.?)\d*vw/g)
+      arr = matchedStr.map(item => {
+        return `${((item.substring(0, item.length - 2)) * (this.props.viewport / 100)).toFixed(2)}px`
+      })
+      reg = new RegExp(/\d*(.?)\d*vw/)
+    } else {
+      matchedStr = content.match(/\d*(.?)\d*px/g)
+      arr = matchedStr.map(item => {
+        return `${((item.substring(0, item.length - 2)) / (this.props.viewport / 100)).toFixed(2)}vw`
+      })
+      reg = new RegExp(/\d*(.?)\d*px/)
+    }
+    let replaceText = ''
+    arr.forEach(item => {
+      if (replaceText === '') {
+        replaceText = content.replace(reg, item)
+      } else {
+        replaceText = replaceText.replace(reg, item)
+      }
+    })
+    this.setState({transformText: replaceText})
+  }
+
+  render () {
+    return (
+      <div className="file-container">
+        <p className="sub-title">Or you can upload the css file to transform the whole file</p>
+        <div className="file-transform">
+          <a href="javascript:;" className="file">select the css file
+            <input type="file" id="file" onChange={this.handleFileContent}></input>
+          </a>
+          <span>{this.state.fileName}</span>
+          <Button onClick={this.transform}>transform</Button>
+          <TextArea
+            placeholder="The transform file text"
+            style={{width: 300}}
+            value={this.state.transformText}
+            autosize={{ minRows: 2, maxRows: 6 }}
+          />
+        </div>
       </div>
     )
   }
@@ -208,13 +204,23 @@ class App extends React.Component {
       result: ''
     })
   }
-
+  
   handleVwResult (viewport, px) {
+    if (viewport === '' || px === '') {
+      this.setState({isMissing: true})
+      message.error('Please make sure the values in the input box are entered.');
+      return
+    }
     const result = `${px / (viewport / 100)}vw`
     this.setState({result: result})
   }
 
   handlePxResult (viewport, vw) {
+    if (viewport === '' || vw === '') {
+      this.setState({isMissing: true})
+      message.error('Please make sure the values in the input box are entered.');
+      return
+    }
     const result = `${vw * (viewport / 100)}px`
     this.setState({result: result})
   }
